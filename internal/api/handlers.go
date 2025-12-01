@@ -13,7 +13,7 @@ func DeployPyMenuHandler(w http.ResponseWriter, r *http.Request) {
 	body, err := decodeJSON[DeployRequest](w, r)
 	if err != nil {
 		var mr *malformedRequest
-		if errors.As(err, *mr) {
+		if errors.As(err, &mr) {
 			http.Error(w, mr.msg, mr.status)
 		} else {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -49,7 +49,7 @@ func UpgradePyMenuHandler(w http.ResponseWriter, r *http.Request) {
 	body, err := decodeJSON[DeployRequest](w, r)
 	if err != nil {
 		var mr *malformedRequest
-		if errors.As(err, *mr) {
+		if errors.As(err, &mr) {
 			http.Error(w, mr.msg, mr.status)
 		} else {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
