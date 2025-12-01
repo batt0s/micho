@@ -34,7 +34,9 @@ func (d DeployRequest) validate() error {
 
 func (d DeployRequest) ToHelmValues() map[string]interface{} {
 	return map[string]interface{}{
-		"domain": d.Domain,
+		"nameOverride":     "",
+		"fullnameOverride": "",
+		"domain":           d.Domain,
 		"ingress": map[string]interface{}{
 			"enabled": true,
 			"tls": map[string]interface{}{
