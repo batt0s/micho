@@ -1,10 +1,14 @@
 package api
 
 import (
+	"io"
+	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 	"time"
 
+	"github.com/batt0s/micho/internal/logging"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
@@ -22,9 +26,24 @@ func (api *API) Init() error {
 		AllowedOrigins: []string{"https://*"},
 		AllowedMethods: []string{"GET", "POST", "DELETE"},
 	}))
-	r.Use(middleware.Logger)
+
+	accessLogFile, err := os.OpenFile(filepath.Join("logs", "access.log"), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		return err
+	}
+	mWriter := io.MultiWriter(os.Stdout, accessLogFile)
+	logger := middleware.RequestLogger(&middleware.DefaultLogFormatter{
+		Logger:  log.New(mWriter, "", log.LstdFlags),
+		NoColor: true,
+	})
+	r.Use(logger)
+
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Timeout(time.Second * 240))
+
+	if err := logging.Init(); err != nil {
+		return err
+	}
 
 	r.Route("/api", func(ar chi.Router) {
 		ar.Post("/deploy", DeployPyMenuHandler)

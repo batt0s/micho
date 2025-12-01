@@ -11,7 +11,9 @@ import (
 
 func main() {
 	api := api.API{}
-	api.Init()
+	if err := api.Init(); err != nil {
+		log.Fatal(err)
+	}
 
 	shutdown := make(chan struct{})
 	go func() {
