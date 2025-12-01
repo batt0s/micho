@@ -34,6 +34,8 @@ func main() {
 
 	api.Server.ListenAndServe()
 
+	log.Println("Started.")
+
 	<-shutdown
 
 }

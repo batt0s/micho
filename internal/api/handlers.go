@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/batt0s/micho/internal/helm"
+	"github.com/batt0s/micho/internal/logging"
 	"github.com/go-chi/chi/v5"
 )
 
@@ -33,8 +34,11 @@ func DeployPyMenuHandler(w http.ResponseWriter, r *http.Request) {
 
 	if err := helm.InstallRelease(cfg); err != nil {
 		http.Error(w, "Deployment Failed: "+err.Error(), http.StatusInternalServerError)
+		logging.Record(body.Slug, "deploy", "failed", err)
 		return
 	}
+
+	logging.Record(body.Slug, "deploy", "successfull", nil)
 
 	respondJSON(w, http.StatusOK, map[string]string{
 		"url": "https://" + body.Domain,
@@ -66,8 +70,11 @@ func UpgradePyMenuHandler(w http.ResponseWriter, r *http.Request) {
 
 	if err := helm.UpgradeRelease(cfg); err != nil {
 		http.Error(w, "Upgrade Failed: "+err.Error(), http.StatusInternalServerError)
+		logging.Record(body.Slug, "upgrade", "failed", err)
 		return
 	}
+
+	logging.Record(body.Slug, "upgrade", "successfull", nil)
 
 	respondJSON(w, http.StatusOK, map[string]string{
 		"url": "https://" + body.Domain,
@@ -86,8 +93,11 @@ func UninstallPyMenuHandler(w http.ResponseWriter, r *http.Request) {
 
 	if err := helm.UninstallRelease(namespace, releaseName); err != nil {
 		http.Error(w, "Uninstall Failed: "+err.Error(), http.StatusInternalServerError)
+		logging.Record(slug, "uninstall", "failed", err)
 		return
 	}
+
+	logging.Record(slug, "uninstall", "successfull", nil)
 
 	respondJSON(w, http.StatusOK, map[string]string{})
 }
