@@ -15,6 +15,8 @@ func main() {
 		log.Fatal(err)
 	}
 
+	log.Println("Starting.")
+
 	shutdown := make(chan struct{})
 	go func() {
 		sigint := make(chan os.Signal, 1)
@@ -33,8 +35,6 @@ func main() {
 	}()
 
 	api.Server.ListenAndServe()
-
-	log.Println("Started.")
 
 	<-shutdown
 

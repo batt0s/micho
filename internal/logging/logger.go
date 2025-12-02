@@ -1,6 +1,8 @@
 package logging
 
 import (
+	"io"
+	"log"
 	"log/slog"
 	"os"
 	"path/filepath"
@@ -26,9 +28,17 @@ func Init() error {
 
 	AuditLog = slog.New(handler)
 
-	slog.SetDefault(AuditLog)
-
 	AuditLog.Info("Audit Logger initialized successfully")
+
+	appLogFile, err := os.OpenFile(filepath.Join(logDir, "micho.log"), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		return err
+	}
+
+	multiWriter := io.MultiWriter(os.Stdout, appLogFile)
+	log.SetOutput(multiWriter)
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
+
 	return nil
 }
 
@@ -44,6 +54,7 @@ func Record(slug, action, status string, err error) {
 			slog.String("user", slug),
 			slog.String("action", action),
 			slog.String("status", status),
+			slog.String("error", err.Error()),
 		)
 	}
 }
