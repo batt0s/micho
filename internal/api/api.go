@@ -27,6 +27,9 @@ func (api *API) Init() error {
 		AllowedMethods: []string{"GET", "POST", "DELETE"},
 	}))
 
+	r.Use(middleware.RequestID)
+	r.Use(middleware.RealIP)
+
 	accessLogFile, err := os.OpenFile(filepath.Join("logs", "access.log"), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		return err
@@ -46,6 +49,7 @@ func (api *API) Init() error {
 	}
 
 	r.Route("/api", func(ar chi.Router) {
+		ar.Use(APIKeyMiddleware)
 		ar.Post("/deploy", DeployPyMenuHandler)
 		ar.Post("/upgrade", UpgradePyMenuHandler)
 		ar.Delete("/uninstall/{slug}", UninstallPyMenuHandler)
